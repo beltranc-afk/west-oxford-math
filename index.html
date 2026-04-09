@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bubble Group · Week 1 · 4.NBT.4 · Slideshow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap');
+
+  :root {
+    --blue:#1565C0;--blue-light:#E3F2FD;--blue-mid:#BBDEFB;
+    --orange:#E65100;--orange-light:#FFF3E0;
+    --green:#2E7D32;--green-light:#E8F5E9;
+    --red:#C62828;--red-light:#FFEBEE;
+    --purple:#6A1B9A;--purple-light:#F3E5F5;
+    --yellow:#F9A825;--yellow-light:#FFFDE7;
+    --dark:#0D1B2A;--text:#212121;--border:#E0E0E0;
+  }
+
+  * { box-sizing:border-box; margin:0; padding:0; }
+
+  html, body {
+    width:100%; height:100%;
+    font-family:'Nunito Sans',sans-serif;
+    background:var(--dark);
+    overflow:hidden;
+    color:var(--text);
+  }
+
+  /* ── OUTER WRAPPER ── */
+  #app {
+    width:100vw; height:100vh;
+    display:flex; flex-direction:column;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background:#162032;
+    padding:10px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; border-bottom:2px solid #243447;
+  }
+  #topbar .left { display:flex; align-items:center; gap:12px; }
+  #topbar h1 { font-family:'Nunito',sans-serif; font-size:16px; font-weight:900; color:white; }
+  #topbar .std-pill {
+    font-size:11px; font-weight:700; padding:3px 12px;
+    border-radius:20px; background:#1565C0; color:white;
+  }
+  #topbar .day-pill {
+    font-size:11px; font-weight:700; padding:3px 12px;
+    border-radius:20px; color:white;
+  }
+  #topbar .right { display:flex; align-items:center; gap:10px; }
+
+  /* Day selector */
+  .day-btn {
+    padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700;
+    cursor:pointer; border:1.5px solid #3a506b; color:#9ab; background:transparent;
+    font-family:'Nunito',sans-serif; transition:all .2s;
+  }
+  .day-btn.active { background:var(--blue); color:white; border-color:var(--blue); }
+  .day-btn:hover  { border-color:var(--blue); color:white; }
+
+  #fullscreen-btn {
+    padding:5px 14px; border-radius:20px; font-size:12px; font-weight:700;
+    cursor:pointer; border:1.5px solid #3a506b; color:#9ab; background:transparent;
+    font-family:'Nunito',sans-serif; transition:all .2s;
+  }
+  #fullscreen-btn:hover { border-color:white; color:white; }
+
+  /* ── SLIDE AREA ── */
+  #slide-area {
+    flex:1; display:flex; align-items:center; justify-content:center;
+    padding:16px 20px; overflow:hidden; position:relative;
+  }
+
+  /* ── SLIDE ── */
+  .slide {
+    display:none;
+    width:100%; max-width:1280px; height:100%;
+    background:white; border-radius:16px;
+    flex-direction:column; overflow:hidden;
+    box-shadow:0 8px 40px rgba(0,0,0,0.5);
+  }
+  .slide.active { display:flex; }
+
+  /* SLIDE HEADER */
+  .slide-header {
+    padding:12px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; border-bottom:2px solid var(--border);
+  }
+  .slide-header-left { display:flex; align-items:center; gap:10px; }
+  .section-tag {
+    font-family:'Nunito',sans-serif; font-size:12px; font-weight:800;
+    text-transform:uppercase; letter-spacing:.06em;
+    padding:4px 14px; border-radius:20px;
+  }
+  .tag-round  { background:var(--orange-light); color:var(--orange); }
+  .tag-add    { background:var(--blue-light);   color:var(--blue); }
+  .tag-sub    { background:var(--green-light);  color:var(--green); }
+  .tag-multi  { background:var(--purple-light); color:var(--purple); }
+  .tag-mixed  { background:var(--red-light);    color:var(--red); }
+  .tag-key    { background:#E8F5E9; color:#1B5E20; }
+  .slide-num  {
+    font-family:'Nunito',sans-serif; font-size:13px; font-weight:700;
+    color:#9E9E9E;
+  }
+
+  /* SLIDE BODY — 2 problems side by side */
+  .slide-body {
+    flex:1; display:grid; grid-template-columns:1fr 1fr;
+    gap:20px; padding:18px 24px; overflow:hidden;
+  }
+  .slide-body.single { grid-template-columns:1fr; }
+  .slide-body.full   { grid-template-columns:1fr; padding:20px 28px; }
+
+  /* PROBLEM CARD */
+  .pcard {
+    background:#FAFAFA; border:2px solid var(--border);
+    border-radius:14px; display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .pcard-head {
+    display:flex; align-items:center; gap:10px;
+    padding:10px 18px; background:white;
+    border-bottom:1.5px solid var(--border); flex-shrink:0;
+  }
+  .pnum {
+    width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Nunito',sans-serif; font-size:15px; font-weight:900;
+    color:white; flex-shrink:0;
+  }
+  .blue   { background:var(--blue); }
+  .orange { background:var(--orange); }
+  .green  { background:var(--green); }
+  .red    { background:var(--red); }
+  .purple { background:var(--purple); }
+
+  .pstd { font-size:12px; font-weight:700; color:#757575; text-transform:uppercase; letter-spacing:.04em; }
+
+  .pbody { padding:16px 18px; flex:1; display:flex; flex-direction:column; overflow:auto; }
+
+  /* STORY BOX */
+  .sbox {
+    background:var(--yellow-light); border-left:4px solid var(--yellow);
+    border-radius:0 10px 10px 0; padding:12px 16px;
+    margin-bottom:14px; font-size:17px; line-height:1.7;
+    font-weight:600;
+  }
+  .sbox strong { font-weight:800; color:var(--blue); }
+
+  /* VISUALS */
+  .vbox {
+    background:var(--blue-light); border:1.5px solid var(--blue-mid);
+    border-radius:10px; padding:14px; margin-bottom:14px; text-align:center;
+  }
+
+  /* TABLES */
+  .dtable { width:100%; border-collapse:collapse; font-size:16px; margin-bottom:10px; }
+  .dtable th { background:var(--blue); color:white; padding:8px 14px; font-weight:700; border:1px solid var(--blue); font-family:'Nunito',sans-serif; }
+  .dtable td { padding:9px 14px; border:1px solid var(--border); text-align:center; font-weight:700; font-size:16px; }
+  .dtable tr:nth-child(even) td { background:var(--blue-light); }
+
+  /* PLACE VALUE TABLE */
+  .pvtable { width:100%; border-collapse:collapse; font-family:'Nunito',sans-serif; }
+  .pvtable th { background:var(--blue); color:white; padding:6px 8px; font-weight:700; border:1px solid var(--blue); font-size:13px; }
+  .pvtable td { padding:9px 8px; border:1px solid var(--blue-mid); text-align:center; font-size:20px; font-weight:800; }
+  .pvtable tr:nth-child(even) td { background:white; }
+  .pvtable tr:nth-child(odd) td  { background:var(--blue-light); }
+
+  /* VERTICAL ALGO */
+  .valgo {
+    font-family:'Nunito',sans-serif; font-size:28px; font-weight:900;
+    line-height:1.9; text-align:right; padding:12px 22px;
+    background:white; border-radius:10px; border:1.5px solid var(--blue-mid);
+    display:inline-block; min-width:180px;
+  }
+  .valgo .carry { font-size:14px; color:var(--red); display:block; text-align:right; margin-bottom:-8px; font-weight:700; }
+  .valgo .vline { border-top:3px solid var(--dark); margin:4px 0; }
+  .valgo .op    { color:var(--blue); margin-right:8px; }
+  .valgo-center { text-align:center; }
+
+  /* STEP BOX */
+  .stepbox {
+    background:var(--green-light); border:1.5px solid #A5D6A7;
+    border-radius:10px; padding:10px 16px; font-size:15px;
+    line-height:2.1; margin-bottom:12px; font-weight:600;
+  }
+
+  /* CHOICES */
+  .choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:auto; padding-top:10px; }
+  .choice {
+    display:flex; align-items:center; gap:12px;
+    padding:11px 16px; border:2px solid var(--border);
+    border-radius:10px; font-size:17px; font-weight:700;
+    cursor:pointer; transition:all .15s; background:white;
+    font-family:'Nunito',sans-serif;
+  }
+  .choice:hover { border-color:var(--blue); background:var(--blue-light); transform:translateY(-1px); }
+  .choice.correct { border-color:var(--green)!important; background:var(--green-light)!important; }
+  .choice.wrong   { border-color:#EF9A9A!important; background:#FFEBEE!important; opacity:.6; }
+  .cletter {
+    width:30px; height:30px; border-radius:50%;
+    background:var(--blue-light); color:var(--blue);
+    font-family:'Nunito',sans-serif; font-size:14px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+
+  /* TEACHER NOTE */
+  .tnote {
+    background:var(--purple-light); border-left:4px solid var(--purple);
+    border-radius:0 10px 10px 0; padding:10px 15px;
+    font-size:14px; line-height:1.6; color:#4A148C; margin-top:10px;
+  }
+  .tnote strong { font-weight:800; }
+
+  /* ANSWER BADGE */
+  .ans-badge {
+    display:none; margin-top:10px; padding:10px 16px;
+    background:var(--green-light); border-radius:10px;
+    font-size:16px; font-weight:800; color:var(--green);
+    border:2px solid #A5D6A7; text-align:center;
+  }
+  .show-ans-btn {
+    margin-top:10px; padding:8px 18px;
+    background:white; border:2px solid var(--border);
+    border-radius:8px; font-size:14px; font-weight:700;
+    cursor:pointer; color:#616161; font-family:'Nunito',sans-serif;
+    transition:all .15s; align-self:flex-start;
+  }
+  .show-ans-btn:hover { border-color:var(--green); color:var(--green); }
+
+  /* ANSWER KEY SLIDE */
+  .ak-grid {
+    display:grid; grid-template-columns:repeat(5,1fr); gap:12px;
+    margin-bottom:20px;
+  }
+  .ak-item {
+    background:white; border:2px solid var(--border);
+    border-radius:10px; padding:12px 8px; text-align:center;
+  }
+  .ak-pnum { font-family:'Nunito',sans-serif; font-size:13px; font-weight:800; color:var(--blue); margin-bottom:4px; }
+  .ak-ans  { font-size:22px; font-weight:900; color:var(--green); font-family:'Nunito',sans-serif; }
+  .ak-val  { font-size:12px; color:#757575; margin-top:2px; }
+
+  .score-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .score-item { border-radius:10px; padding:12px; text-align:center; }
+  .score-item .score-range { font-family:'Nunito',sans-serif; font-size:18px; font-weight:900; margin-bottom:4px; }
+  .score-item .score-label { font-size:12px; font-weight:600; line-height:1.4; }
+
+  /* TITLE SLIDE */
+  .title-slide-body {
+    flex:1; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:20px; padding:30px; text-align:center;
+    background:linear-gradient(135deg, #E3F2FD 0%, #FAFAFA 100%);
+  }
+  .title-big { font-family:'Nunito',sans-serif; font-size:42px; font-weight:900; color:var(--blue); line-height:1.2; }
+  .title-sub { font-size:20px; color:#616161; font-weight:600; }
+  .title-chips { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .title-chip {
+    padding:8px 20px; border-radius:20px; font-family:'Nunito',sans-serif;
+    font-size:14px; font-weight:800;
+  }
+  .tc-blue   { background:var(--blue-light); color:var(--blue); }
+  .tc-orange { background:var(--orange-light); color:var(--orange); }
+  .tc-green  { background:var(--green-light); color:var(--green); }
+
+  /* ── NAVIGATION ── */
+  #nav {
+    background:#162032; padding:12px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0; border-top:2px solid #243447;
+  }
+  .nav-btn {
+    padding:10px 28px; border-radius:30px;
+    font-family:'Nunito',sans-serif; font-size:15px; font-weight:800;
+    cursor:pointer; border:none; transition:all .2s;
+    display:flex; align-items:center; gap:8px;
+  }
+  #prev-btn { background:#243447; color:#9ab; }
+  #prev-btn:hover { background:#2e4060; color:white; }
+  #next-btn { background:var(--blue); color:white; }
+  #next-btn:hover { background:#1976D2; transform:translateX(2px); }
+  #next-btn:disabled { background:#243447; color:#4a5e74; cursor:default; transform:none; }
+
+  #progress-wrap { flex:1; margin:0 24px; }
+  #progress-label { font-size:12px; color:#6a8099; text-align:center; margin-bottom:6px; font-family:'Nunito',sans-serif; font-weight:700; }
+  #progress-bar-bg { background:#243447; border-radius:10px; height:8px; overflow:hidden; }
+  #progress-bar    { background:var(--blue); height:100%; border-radius:10px; transition:width .3s ease; }
+
+  /* KEYBOARD HINT */
+  #kbd-hint { font-size:11px; color:#4a5e74; font-family:'Nunito',sans-serif; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="left">
+      <h1>🫧 Bubble Group · Week 1</h1>
+      <span class="std-pill">4.NBT.4</span>
+      <span id="day-label" class="day-pill" style="background:#E65100">📘 Day 1 — Teacher Models</span>
+    </div>
+    <div class="right">
+      <button class="day-btn active" onclick="loadDay(1,this)">Day 1</button>
+      <button class="day-btn" onclick="loadDay(2,this)">Day 2</button>
+      <button class="day-btn" onclick="loadDay(3,this)">Day 3</button>
+      <button id="fullscreen-btn" onclick="toggleFS()">⛶ Fullscreen</button>
+    </div>
+  </div>
+
+  <!-- SLIDE AREA -->
+  <div id="slide-area">
+    <!-- slides injected by JS -->
+  </div>
+
+  <!-- NAVIGATION -->
+  <div id="nav">
+    <button class="nav-btn" id="prev-btn" onclick="go(-1)">← Back</button>
+    <div id="progress-wrap">
+      <div id="progress-label">Slide 1 of 1</div>
+      <div id="progress-bar-bg"><div id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <button class="nav-btn" id="next-btn" onclick="go(1)">Next →</button>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// SLIDE DATA
+// ═══════════════════════════════════════════════════
+
+const days = {
+
+// ─────────────────────────────────────────────────
+1: [
+  // TITLE
+  {type:'title', day:1,
+   title:'Add &amp; Subtract<br>Multi-Digit Numbers',
+   sub:'Rounding · Addition · Subtraction',
+   chips:['📘 Day 1 — Teacher Models Everything','4.NBT.4','3 Questions on EOG 🔴'],
+   tag:'', label:''},
+
+  // ROUNDING
+  {type:'pair', tag:'tag-round', label:'🔵 Rounding to Nearest Hundred · Problems 1–2', problems:[
+    {num:'1', color:'orange', std:'Rounding · DOK 1',
+     story:'🍪 A bakery made <strong>664</strong> cookies yesterday. What is <strong>664</strong> rounded to the nearest hundred?',
+     visual:`<svg width="280" height="70" viewBox="0 0 280 70">
+       <line x1="14" y1="35" x2="266" y2="35" stroke="#1565C0" stroke-width="3" stroke-linecap="round"/>
+       <line x1="14" y1="24" x2="14" y2="46" stroke="#1565C0" stroke-width="2.5"/>
+       <text x="14" y="62" text-anchor="middle" font-size="14" font-weight="700" fill="#1565C0" font-family="Nunito Sans">600</text>
+       <line x1="140" y1="24" x2="140" y2="46" stroke="#1565C0" stroke-width="1.5" stroke-dasharray="4"/>
+       <text x="140" y="62" text-anchor="middle" font-size="13" font-weight="600" fill="#9E9E9E" font-family="Nunito Sans">650</text>
+       <line x1="266" y1="24" x2="266" y2="46" stroke="#1565C0" stroke-width="2.5"/>
+       <text x="266" y="62" text-anchor="middle" font-size="14" font-weight="700" fill="#1565C0" font-family="Nunito Sans">700</text>
+       <circle cx="183" cy="35" r="9" fill="#E65100"/>
+       <text x="183" y="18" text-anchor="middle" font-size="13" font-weight="800" fill="#E65100" font-family="Nunito">664</text>
+       <text x="183" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#E65100" font-family="Nunito">closer to 700 ↑</text>
+     </svg>`,
+     choices:['600','700 ✓','660','670'], answer:1,
+     note:'<strong>Teacher:</strong> "I find 664 on the number line. Halfway is 650. Is 664 above 650? YES — rounds UP to 700."'},
+    {num:'2', color:'orange', std:'Rounding · DOK 1',
+     story:'🏫 A school collected <strong>1,247</strong> canned goods. What is <strong>1,247</strong> rounded to the nearest hundred?',
+     visual:`<svg width="280" height="70" viewBox="0 0 280 70">
+       <line x1="14" y1="35" x2="266" y2="35" stroke="#1565C0" stroke-width="3" stroke-linecap="round"/>
+       <line x1="14" y1="24" x2="14" y2="46" stroke="#1565C0" stroke-width="2.5"/>
+       <text x="14" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#1565C0" font-family="Nunito Sans">1,200</text>
+       <line x1="140" y1="24" x2="140" y2="46" stroke="#1565C0" stroke-width="1.5" stroke-dasharray="4"/>
+       <text x="140" y="62" text-anchor="middle" font-size="12" font-weight="600" fill="#9E9E9E" font-family="Nunito Sans">1,250</text>
+       <line x1="266" y1="24" x2="266" y2="46" stroke="#1565C0" stroke-width="2.5"/>
+       <text x="266" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#1565C0" font-family="Nunito Sans">1,300</text>
+       <circle cx="101" cy="35" r="9" fill="#E65100"/>
+       <text x="101" y="18" text-anchor="middle" font-size="13" font-weight="800" fill="#E65100" font-family="Nunito">1,247</text>
+       <text x="101" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#E65100" font-family="Nunito">closer to 1,200 ↓</text>
+     </svg>`,
+     choices:['1,200 ✓','1,300','1,250','1,000'], answer:0,
+     note:'<strong>Teacher:</strong> "1,247 — halfway is 1,250. Is 1,247 above or below 1,250? BELOW — rounds DOWN to 1,200."'},
+  ]},
+
+  {type:'single', tag:'tag-round', label:'🔵 Rounding · Problem 3 — Two Steps', problems:[
+    {num:'3', color:'orange', std:'Add + Round · DOK 2 · Like EOG Q7',
+     story:'🏫 There are 3 parks in a city. This table shows the number of visitors at each park.',
+     visual:`<table class="dtable"><tr><th>Park</th><th>Visitors</th></tr><tr><td>Riverside</td><td>2,418</td></tr><tr><td>Oakwood</td><td>763</td></tr><tr><td>Hillside</td><td>1,312</td></tr></table><div style="background:#E8F5E9;border-radius:8px;padding:10px 14px;font-size:15px;font-weight:700;color:#2E7D32;margin-top:8px">Step 1: Add all 3 &nbsp;→&nbsp; Step 2: Round to nearest hundred</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     question:'What is the total number of visitors at all 3 parks, <strong>rounded to the nearest hundred?</strong>',
+     choices:['4,000','4,400','4,500 ✓','5,000'], answer:2,
+     note:'<strong>Teacher:</strong> "TWO steps! Add first: 2,418+763+1,312=4,493. Then round: 4,493 → halfway between 4,400 and 4,500 is 4,450. Is 4,493 above 4,450? YES → 4,500."'},
+  ]},
+
+  // ADDITION
+  {type:'pair', tag:'tag-add', label:'➕ Addition · Problems 4–5 · Teacher Models', problems:[
+    {num:'4', color:'blue', std:'Addition · DOK 1 · Like EOG Q3',
+     story:'🎵 A band performed one concert on Friday and one on Saturday. <strong>8,519</strong> people attended on Friday. <strong>7,346</strong> people attended on Saturday. How many people attended <strong>in all?</strong>',
+     visual:`<div class="valgo-center"><div class="valgo"><span class="carry">&nbsp;1</span>8,519<br><span class="op">+</span>7,346<div class="vline"></div>15,865</div></div>`,
+     choices:['15,755','15,865 ✓','16,865','15,965'], answer:1,
+     note:'<strong>Teacher:</strong> "In all = ADD. Ones: 9+6=15, write 5 carry 1. Tens: 1+4+1=6. Hundreds: 5+3=8. Thousands: 8+7=15. Answer: 15,865."'},
+    {num:'5', color:'blue', std:'Addition · DOK 1 · Like EOG Q11',
+     story:'🚶 Marcus and Leila walked steps last week. Marcus walked <strong>18,374</strong> steps. Leila walked <strong>24,619</strong> steps. How many steps did they walk <strong>altogether?</strong>',
+     visual:`<table class="pvtable"><tr><th>Ten-Th.</th><th>Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr><tr><td>1</td><td>8</td><td>3</td><td>7</td><td>4</td></tr><tr><td>2</td><td>4</td><td>6</td><td>1</td><td>9</td></tr><tr style="background:#BBDEFB"><td><strong>4</strong></td><td><strong>2</strong></td><td><strong>9</strong></td><td><strong>9</strong></td><td><strong>3</strong></td></tr></table>`,
+     choices:['42,883','42,993 ✓','43,993','42,903'], answer:1,
+     note:'<strong>Teacher:</strong> "Altogether = ADD. Use the place value table. 4+9=13, carry 1. 7+1+1=9. 3+6=9. 8+4=12, carry 1. 1+2+1=4. Answer: 42,993."'},
+  ]},
+
+  {type:'single', tag:'tag-add', label:'➕ Addition · Problem 6 — Three Addends', problems:[
+    {num:'6', color:'blue', std:'Addition · DOK 2 · 3 addends',
+     story:'🏫 Three schools collected books. East collected <strong>1,847</strong>. West collected <strong>2,356</strong>. Central collected <strong>1,092</strong>. How many books were collected <strong>in all?</strong>',
+     visual:`<div class="valgo-center"><div class="valgo" style="font-size:24px"><span class="carry">&nbsp;1&nbsp;2</span>1,847<br>2,356<br><span class="op">+</span>1,092<div class="vline"></div>5,295</div></div>`,
+     choices:['5,195','5,285','5,295 ✓','5,395'], answer:2,
+     note:'<strong>Teacher:</strong> "Three addends — same process! 7+6+2=15, carry 1. 4+5+9+1=19, carry 1. 8+3+0+1=12, carry 1. 1+2+1+1=5. Answer: 5,295."'},
+  ]},
+
+  // SUBTRACTION
+  {type:'pair', tag:'tag-sub', label:'➖ Subtraction · Problems 7–8 · Teacher Models', problems:[
+    {num:'7', color:'green', std:'Subtraction · DOK 1 · Like EOG Q3',
+     story:'🎭 A total of <strong>17,582</strong> people went to a play on Friday and Saturday. <strong>9,347</strong> people went on Friday. How many people went on <strong>Saturday?</strong>',
+     visual:`<div class="valgo-center"><div class="valgo">17,582<br><span class="op">−</span>&nbsp;9,347<div class="vline"></div>&nbsp;8,235</div></div>`,
+     choices:['7,235','8,335','8,235 ✓','8,245'], answer:2,
+     note:'<strong>Teacher:</strong> "Total − part = other part. 17,582 − 9,347. Ones: 2−7? Regroup! 12−7=5. Tens: 7−1−4=2. Hundreds: 5−3=2. Thousands: 7−9? Regroup! 17−9=8. Answer: 8,235."'},
+    {num:'8', color:'green', std:'Subtraction · DOK 1 · Like EOG Q11',
+     story:'🚶 Sofia and Diego walked a total of <strong>48,305</strong> steps last month. Diego walked <strong>19,672</strong> steps. How many steps did <strong>Sofia</strong> walk?',
+     visual:`<svg width="300" height="76" viewBox="0 0 300 76"><rect x="10" y="6" width="280" height="30" rx="8" fill="#1565C0"/><text x="150" y="26" text-anchor="middle" fill="white" font-size="15" font-weight="700" font-family="Nunito Sans">TOTAL: 48,305 steps</text><rect x="10" y="46" width="126" height="24" rx="8" fill="#BBDEFB"/><text x="73" y="62" text-anchor="middle" fill="#1565C0" font-size="13" font-weight="700" font-family="Nunito Sans">Diego: 19,672</text><rect x="164" y="46" width="126" height="24" rx="8" fill="#FFB74D" opacity=".85"/><text x="227" y="62" text-anchor="middle" fill="#E65100" font-size="13" font-weight="700" font-family="Nunito Sans">Sofia: ?</text></svg>`,
+     choices:['29,733','28,633 ✓','28,733','28,643'], answer:1,
+     note:'<strong>Teacher:</strong> "Part-whole model — total minus one part gives the other. 48,305 − 19,672. Watch the zero in the tens place when regrouping!"'},
+  ]},
+
+  {type:'pair', tag:'tag-sub', label:'➖ Subtraction · Problems 9–10 · Teacher Models', problems:[
+    {num:'9', color:'green', std:'Subtraction · DOK 1 · Like EOG Q17',
+     story:'🎶 A total of <strong>41,836</strong> people went to a music festival on Friday and Saturday. On Friday, <strong>22,491</strong> people came. How many people went on <strong>Saturday night?</strong>',
+     visual:`<div class="valgo-center"><div class="valgo">41,836<br><span class="op">−</span>22,491<div class="vline"></div>19,345</div></div>`,
+     choices:['19,455','18,345','19,355','19,345 ✓'], answer:3,
+     note:'<strong>Teacher:</strong> "Same setup as Q17 on the REAL EOG! Total − Friday = Saturday. 41,836 − 22,491 = 19,345."'},
+    {num:'10', color:'green', std:'Subtraction · DOK 2 · Across zeros ⚠️',
+     story:'🏟️ A stadium has <strong>50,000</strong> seats. <strong>37,284</strong> seats are filled. How many seats are <strong>empty?</strong>',
+     visual:`<div style="background:#FFEBEE;border-left:4px solid #C62828;border-radius:0 10px 10px 0;padding:10px 14px;font-size:15px;font-weight:700;color:#C62828;margin-bottom:10px">⚠️ Subtracting FROM zeros — regroup carefully!</div><div class="valgo-center"><div class="valgo">50,000<br><span class="op">−</span>37,284<div class="vline"></div>12,716</div></div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['13,716','12,826','12,716 ✓','12,726'], answer:2,
+     note:'<strong>Teacher:</strong> "Regrouping across multiple zeros — borrow from the 5 all the way down. This is the HARDEST type and appears on the EOG!"'},
+  ]},
+],
+
+// ─────────────────────────────────────────────────
+2: [
+  {type:'title', day:2,
+   title:'Multi-Step Problems<br>&amp; Mixed Review',
+   sub:'Two operations · With teacher help when needed',
+   chips:['✏️ Day 2 — Try First, Ask When Stuck','4.NBT.4','Multi-step + Mixed'],
+   tag:'', label:''},
+
+  {type:'pair', tag:'tag-multi', label:'🟣 Multi-Step Problems · 1–2 · Try First!', problems:[
+    {num:'1', color:'purple', std:'Multi-step · DOK 2',
+     story:'🎪 A carnival had <strong>23,415</strong> visitors on Saturday and <strong>18,763</strong> on Sunday. On Monday, <strong>4,892</strong> visitors left early. How many visitors were there <strong>after Monday\'s early departures?</strong>',
+     visual:`<div class="stepbox">Step 1: Add Saturday + Sunday<br>Step 2: Subtract Monday\'s departures</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['37,186','37,286 ✓','38,286','37,386'], answer:1,
+     note:''},
+    {num:'2', color:'purple', std:'Multi-step · DOK 2',
+     story:'📚 A library had <strong>52,340</strong> books. It received <strong>3,217</strong> new books in January and <strong>2,094</strong> new books in February. How many books does the library have <strong>now?</strong>',
+     visual:`<div class="stepbox">Step 1: Add January books → new total<br>Step 2: Add February books</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['57,441','57,651 ✓','57,651','58,651'], answer:1,
+     note:''},
+  ]},
+
+  {type:'pair', tag:'tag-multi', label:'🟣 Multi-Step · Problems 3–4', problems:[
+    {num:'3', color:'purple', std:'Multi-step + Table · DOK 2',
+     story:'🏫 This table shows students at 3 schools. One school added <strong>325</strong> new students. What is the <strong>new total</strong> for all 3 schools?',
+     visual:`<table class="dtable" style="margin-bottom:10px"><tr><th>School</th><th>Students</th></tr><tr><td>Maple</td><td>1,847</td></tr><tr><td>Cedar</td><td>1,203</td></tr><tr><td>Pine</td><td>2,156</td></tr></table><div class="stepbox">Step 1: Add all 3 schools<br>Step 2: Add 325 new students</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['5,206','5,531 ✓','5,431','5,106'], answer:1,
+     note:''},
+    {num:'4', color:'purple', std:'Multi-step · DOK 2',
+     story:'🚌 A city bus carried <strong>14,628</strong> passengers last week. This week it carried <strong>16,315</strong>. Next week they expect <strong>2,400 fewer</strong> than this week. How many passengers are expected <strong>next week?</strong>',
+     visual:`<div class="stepbox">Step 1: This week\'s passengers only<br>Step 2: Subtract 2,400</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['13,915 ✓','14,915','28,543','15,315'], answer:0,
+     note:''},
+  ]},
+
+  {type:'single', tag:'tag-multi', label:'🟣 Multi-Step · Problem 5 — Add + Round', problems:[
+    {num:'5', color:'purple', std:'Multi-step + Round · DOK 3',
+     story:'🌳 Three nature parks had visitors this summer. Park A had <strong>12,483</strong>. Park B had <strong>8,764</strong>. Park C had <strong>11,319</strong> visitors. What was the <strong>total rounded to the nearest hundred?</strong>',
+     visual:`<div class="stepbox">Step 1: Add all 3 parks → total<br>Step 2: Round total to nearest hundred</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['32,500','32,600 ✓','33,500','32,000'], answer:1,
+     note:''},
+  ]},
+
+  {type:'pair', tag:'tag-mixed', label:'🔀 Mixed Review · Problems 6–7', problems:[
+    {num:'6', color:'red', std:'Subtraction · DOK 1 · Like Q17',
+     story:'🎵 A total of <strong>36,508</strong> people attended a concert over two nights. <strong>19,274</strong> came the first night. How many came the <strong>second night?</strong>',
+     visual:'',
+     choices:['16,234','17,234 ✓','17,334','17,244'], answer:1,
+     note:''},
+    {num:'7', color:'red', std:'Add + Round · DOK 2 · Like Q7',
+     story:'🏘️ Three neighborhoods have these populations.',
+     visual:`<table class="dtable" style="margin-bottom:10px"><tr><th>Neighborhood</th><th>Population</th></tr><tr><td>Northside</td><td>3,721</td></tr><tr><td>Eastview</td><td>1,284</td></tr><tr><td>Westgate</td><td>2,063</td></tr></table><p style="font-size:16px;font-weight:700;margin-bottom:8px">What is the total population <strong>rounded to the nearest hundred?</strong></p>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['7,000','7,100 ✓','7,068','7,200'], answer:1,
+     note:''},
+  ]},
+
+  {type:'pair', tag:'tag-mixed', label:'🔀 Mixed Review · Problems 8–9', problems:[
+    {num:'8', color:'red', std:'Subtraction · DOK 1 · Like Q11',
+     story:'🏃 Jaylen and Priya ran a total of <strong>73,148</strong> meters last month. Jaylen ran <strong>38,564</strong> meters. How many meters did <strong>Priya</strong> run?',
+     visual:'',
+     choices:['35,584','34,484','34,584 ✓','35,484'], answer:2,
+     note:''},
+    {num:'9', color:'red', std:'Addition · DOK 1',
+     story:'🎠 A theme park sold <strong>27,836</strong> tickets in June and <strong>34,291</strong> in July. How many tickets were sold <strong>in both months?</strong>',
+     visual:'',
+     choices:['61,027','62,127 ✓','62,027','62,117'], answer:1,
+     note:''},
+  ]},
+
+  {type:'single', tag:'tag-mixed', label:'🔀 Mixed Review · Problem 10 — Across Zeros', problems:[
+    {num:'10', color:'red', std:'Subtraction · DOK 2 · Across zeros',
+     story:'🏟️ An arena holds <strong>80,000</strong> people. <strong>54,736</strong> tickets have been sold. How many tickets are <strong>still available?</strong>',
+     visual:`<div style="background:#FFEBEE;border-left:4px solid #C62828;border-radius:0 10px 10px 0;padding:10px 14px;font-size:15px;font-weight:700;color:#C62828">⚠️ Subtracting from zeros — regroup carefully!</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['26,364','25,264 ✓','25,364','25,374'], answer:1,
+     note:''},
+  ]},
+],
+
+// ─────────────────────────────────────────────────
+3: [
+  {type:'title', day:3,
+   title:'Independent Practice',
+   sub:'No help from the teacher — show what you know!',
+   chips:['🎯 Day 3 — Fully Independent','4.NBT.4','Answer Key at end'],
+   tag:'', label:''},
+
+  {type:'pair', tag:'tag-round', label:'Problems 1–2', problems:[
+    {num:'1', color:'blue', std:'Rounding · DOK 1',
+     story:'🍪 A bakery made <strong>3,847</strong> cookies this week. What is <strong>3,847</strong> rounded to the <strong>nearest hundred?</strong>',
+     visual:'', choices:['3,800 ✓','3,900','4,000','3,840'], answer:0, note:''},
+    {num:'2', color:'blue', std:'Add + Round · DOK 2 · Like EOG Q7',
+     story:'🏫 Three schools have these enrollments.',
+     visual:`<table class="dtable" style="margin-bottom:10px"><tr><th>School</th><th>Students</th></tr><tr><td>Sunview</td><td>1,418</td></tr><tr><td>Riverdale</td><td>876</td></tr><tr><td>Hilltop</td><td>1,534</td></tr></table><p style="font-size:16px;font-weight:700">What is the total enrollment <strong>rounded to the nearest hundred?</strong></p>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['3,800 ✓','3,700','3,900','4,000'], answer:0, note:''},
+  ]},
+
+  {type:'pair', tag:'tag-add', label:'Problems 3–4', problems:[
+    {num:'3', color:'blue', std:'Addition · DOK 1 · Like EOG Q3',
+     story:'🎵 A band performed two concerts. <strong>12,637</strong> people came on Friday. <strong>9,824</strong> people came on Sunday. How many people attended <strong>in all?</strong>',
+     visual:'', choices:['21,461','22,461 ✓','22,361','21,561'], answer:1, note:''},
+    {num:'4', color:'blue', std:'Subtraction · DOK 1 · Like EOG Q3',
+     story:'🎭 A total of <strong>28,416</strong> people attended a festival on Saturday and Sunday. <strong>15,839</strong> came on Saturday. How many people came on <strong>Sunday?</strong>',
+     visual:'', choices:['12,577 ✓','13,477','12,677','12,587'], answer:0, note:''},
+  ]},
+
+  {type:'pair', tag:'tag-sub', label:'Problems 5–6', problems:[
+    {num:'5', color:'blue', std:'Subtraction · DOK 1 · Like EOG Q11',
+     story:'🚶 Darius and Camille walked a total of <strong>55,732</strong> steps last week. Darius walked <strong>28,419</strong> steps. How many steps did <strong>Camille</strong> walk?',
+     visual:'', choices:['27,313 ✓','26,313','27,213','27,323'], answer:0, note:''},
+    {num:'6', color:'blue', std:'Subtraction · DOK 1 · Like EOG Q17',
+     story:'🎶 A total of <strong>53,274</strong> people attended a music festival on Friday and Saturday. On Friday, <strong>27,836</strong> people came. How many came on <strong>Saturday?</strong>',
+     visual:'', choices:['26,448','25,338','25,438 ✓','25,448'], answer:2, note:''},
+  ]},
+
+  {type:'pair', tag:'tag-multi', label:'Problems 7–8', problems:[
+    {num:'7', color:'blue', std:'Multi-step · DOK 2',
+     story:'📚 A library had <strong>44,218</strong> books. It received <strong>2,836</strong> new books and then donated <strong>1,547</strong> old books. How many books does the library have <strong>now?</strong>',
+     visual:`<div class="stepbox">Step 1: 44,218 + 2,836 = ______<br>Step 2: ______ − 1,547 = ______</div>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['45,507 ✓','45,607','46,601','45,407'], answer:0, note:''},
+    {num:'8', color:'blue', std:'Multi-step + Table · DOK 2',
+     story:'🏫 These schools collected supplies. One school received <strong>418 more</strong> supplies. What is the <strong>new total</strong> for all schools?',
+     visual:`<table class="dtable" style="margin-bottom:8px"><tr><th>School</th><th>Supplies</th></tr><tr><td>Oak</td><td>2,315</td></tr><tr><td>Elm</td><td>1,847</td></tr><tr><td>Birch</td><td>1,263</td></tr></table>`,
+     vboxStyle:'background:white;border:none;padding:0;',
+     choices:['5,425','5,843 ✓','5,643','5,725'], answer:1, note:''},
+  ]},
+
+  {type:'pair', tag:'tag-sub', label:'Problems 9–10', problems:[
+    {num:'9', color:'blue', std:'Subtraction · DOK 2 · Zeros',
+     story:'🏟️ A stadium can hold <strong>70,000</strong> people. <strong>48,263</strong> seats are taken. How many seats are <strong>empty?</strong>',
+     visual:'', choices:['22,747','21,737 ✓','21,747','22,737'], answer:1, note:''},
+    {num:'10', color:'blue', std:'Multi-step + Round · DOK 3',
+     story:'🌳 Park 1 had <strong>8,347</strong> visitors. Park 2 had <strong>6,219</strong> visitors. Together Parks 1 and 2 had how many visitors, <strong>rounded to the nearest hundred?</strong>',
+     visual:'', choices:['14,500','14,600 ✓','15,600','14,000'], answer:1, note:''},
+  ]},
+
+  // ANSWER KEY
+  {type:'answerkey', tag:'tag-key', label:'🔑 Answer Key — Day 3',
+   answers:[
+     {p:'1',a:'A',v:'3,800'},
+     {p:'2',a:'A',v:'3,828→3,800'},
+     {p:'3',a:'B',v:'22,461'},
+     {p:'4',a:'A',v:'12,577'},
+     {p:'5',a:'A',v:'27,313'},
+     {p:'6',a:'C',v:'25,438'},
+     {p:'7',a:'A',v:'45,507'},
+     {p:'8',a:'B',v:'5,843'},
+     {p:'9',a:'B',v:'21,737'},
+     {p:'10',a:'B',v:'14,566→14,600'},
+   ],
+   scoring:[
+     {range:'9–10 ✅',label:'Solid on 4.NBT.4\nReady for Week 2',bg:'#E8F5E9',color:'#1B5E20'},
+     {range:'7–8 ⚠️',label:'Almost there\nQuick re-teach on regrouping',bg:'#FFF8E1',color:'#F57F17'},
+     {range:'5–6 🟡',label:'Needs more practice\nAdd 2 problems next session',bg:'#FFF3E0',color:'#E65100'},
+     {range:'0–4 🔴',label:'Significant gaps\nPull for individual re-teach',bg:'#FFEBEE',color:'#B71C1C'},
+   ]},
+]};
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+let currentDay = 1;
+let currentSlide = 0;
+let slides = [];
+
+function buildSlide(data) {
+  const div = document.createElement('div');
+  div.className = 'slide';
+
+  if (data.type === 'title') {
+    div.innerHTML = `
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="section-tag tag-blue" style="background:#E3F2FD;color:#1565C0">Day ${data.day} of 3</span>
+        </div>
+      </div>
+      <div class="title-slide-body">
+        <div class="title-big">${data.title}</div>
+        <div class="title-sub">${data.sub}</div>
+        <div class="title-chips">
+          ${data.chips.map((c,i)=>`<span class="title-chip ${i===0?'tc-orange':i===1?'tc-blue':'tc-green'}">${c}</span>`).join('')}
+        </div>
+      </div>`;
+    return div;
+  }
+
+  if (data.type === 'answerkey') {
+    div.innerHTML = `
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="section-tag ${data.tag}">${data.label}</span>
+        </div>
+      </div>
+      <div class="slide-body full" style="overflow:auto">
+        <div class="ak-grid">${data.answers.map(a=>`
+          <div class="ak-item">
+            <div class="ak-pnum">Problem ${a.p}</div>
+            <div class="ak-ans">${a.a}</div>
+            <div class="ak-val">${a.v}</div>
+          </div>`).join('')}</div>
+        <div class="score-grid">${data.scoring.map(s=>`
+          <div class="score-item" style="background:${s.bg}">
+            <div class="score-range" style="color:${s.color}">${s.range}</div>
+            <div class="score-label" style="color:${s.color}">${s.label.replace('\n','<br>')}</div>
+          </div>`).join('')}</div>
+      </div>`;
+    return div;
+  }
+
+  const isSingle = data.type === 'single';
+  const gridClass = isSingle ? 'slide-body single' : 'slide-body';
+
+  const renderProblem = (p) => {
+    const hasVisual = p.visual && p.visual.trim() !== '';
+    const vStyle = p.vboxStyle || '';
+    return `
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="pnum ${p.color}">${p.num}</div>
+        <span class="pstd">${p.std}</span>
+      </div>
+      <div class="pbody">
+        <div class="sbox">${p.story}</div>
+        ${hasVisual ? `<div class="vbox" style="${vStyle}">${p.visual}</div>` : ''}
+        ${p.question ? `<p style="font-size:17px;font-weight:700;margin-bottom:12px">${p.question}</p>` : ''}
+        <div class="choices">
+          ${p.choices.map((c,i)=>`
+            <div class="choice" onclick="checkAnswer(this,${i},${p.answer})">
+              <span class="cletter">${['A','B','C','D'][i]}</span>${c.replace(' ✓','')}
+            </div>`).join('')}
+        </div>
+        ${p.note ? `
+          <button class="show-ans-btn" onclick="showNote(this)">💡 Teacher Note</button>
+          <div class="tnote" style="display:none">${p.note}</div>` : ''}
+      </div>
+    </div>`;
+  };
+
+  div.innerHTML = `
+    <div class="slide-header">
+      <div class="slide-header-left">
+        <span class="section-tag ${data.tag}">${data.label}</span>
+      </div>
+      <span class="slide-num" id="sn-${slides.length}"></span>
+    </div>
+    <div class="${gridClass}">
+      ${data.problems.map(renderProblem).join('')}
+    </div>`;
+  return div;
+}
+
+function checkAnswer(el, chosen, correct) {
+  const parent = el.closest('.choices');
+  parent.querySelectorAll('.choice').forEach((c,i) => {
+    c.classList.remove('correct','wrong');
+    if (i === correct) c.classList.add('correct');
+    else if (i === chosen) c.classList.add('wrong');
+  });
+}
+
+function showNote(btn) {
+  btn.nextElementSibling.style.display = btn.nextElementSibling.style.display === 'none' ? 'block' : 'none';
+  btn.textContent = btn.nextElementSibling.style.display === 'block' ? '💡 Hide Note' : '💡 Teacher Note';
+}
+
+function loadDay(d, tabEl) {
+  currentDay = d;
+  currentSlide = 0;
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+
+  const labels = {1:'📘 Day 1 — Teacher Models', 2:'✏️ Day 2 — With Help', 3:'🎯 Day 3 — Independent'};
+  const colors = {1:'#E65100', 2:'#1565C0', 3:'#C62828'};
+  document.getElementById('day-label').textContent = labels[d];
+  document.getElementById('day-label').style.background = colors[d];
+
+  const area = document.getElementById('slide-area');
+  area.innerHTML = '';
+  slides = [];
+
+  days[d].forEach(data => {
+    const el = buildSlide(data);
+    area.appendChild(el);
+    slides.push(el);
+  });
+
+  render();
+}
+
+function render() {
+  slides.forEach((s,i) => {
+    s.classList.toggle('active', i === currentSlide);
+  });
+  const total = slides.length;
+  const cur   = currentSlide + 1;
+  document.getElementById('progress-label').textContent = `Slide ${cur} of ${total}`;
+  document.getElementById('progress-bar').style.width = `${(cur/total)*100}%`;
+  document.getElementById('prev-btn').disabled = currentSlide === 0;
+  document.getElementById('next-btn').disabled = currentSlide === slides.length - 1;
+}
+
+function go(dir) {
+  currentSlide = Math.max(0, Math.min(slides.length-1, currentSlide+dir));
+  render();
+}
+
+function toggleFS() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen();
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    { e.preventDefault(); go(-1); }
+  if (e.key === 'f' || e.key === 'F') toggleFS();
+});
+
+loadDay(1, document.querySelector('.day-btn.active'));
+</script>
+</body>
+</html>
